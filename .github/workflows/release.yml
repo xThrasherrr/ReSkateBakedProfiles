@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: ['profiles/**']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > notes.md <<'EOF'
+          ## How do I use these?
+          1. Download the `.r2z` file for the profile you want from **Assets** below.
+          2. Open ReSkateLauncher.
+          3. Go to **Profiles**.
+          4. In the **Import** section, click **Import File** and pick the `.r2z` you downloaded.
+
+          What each profile contains is in the [README](${{ github.server_url }}/${{ github.repository }}#profiles).
+          EOF
+          gh release create "v$(date -u +%Y.%m.%d)-${{ github.run_number }}" profiles/*.r2z \
+            --title "baked. profiles $(date -u +%Y-%m-%d)" \
+            --notes-file notes.md
